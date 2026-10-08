@@ -105,7 +105,7 @@ function ChatContent() {
       // Conversation doesn't exist yet — create it
       (async () => {
         try {
-          const { data } = await supabase.rpc('get_or_create_conversation', { p_match_id: matchId });
+          const { data } = await (supabase as any).rpc('get_or_create_conversation', { p_match_id: matchId });
           if (data?.conversation_id) {
             await fetchConversations();
           }
@@ -131,12 +131,12 @@ function ChatContent() {
         setChatEntitlement(null);
         return;
       }
-      const { data, error } = await supabase.rpc('get_chat_entitlement', {
+      const { data, error } = await (supabase as any).rpc('get_chat_entitlement', {
         p_conversation_id: activeConversation.conversationId,
         p_content: null,
       });
       if (!cancelled && !error && data) {
-        const result = data as { plan?: 'free' | 'premium' | 'vip'; message_count?: number; contact_detected?: boolean };
+        const result = data as unknown as { plan?: 'free' | 'premium' | 'vip'; message_count?: number; contact_detected?: boolean };
         setChatEntitlement({
           plan: result.plan || 'free',
           messageCount: Number(result.message_count || 0),
@@ -169,13 +169,13 @@ function ChatContent() {
   const handleSend = useCallback(async (content: string, type?: string) => {
     if (!activeConversation || !user) return false;
 
-    const { data, error } = await supabase.rpc('get_chat_entitlement', {
+    const { data, error } = await (supabase as any).rpc('get_chat_entitlement', {
       p_conversation_id: activeConversation.conversationId,
       p_content: content,
     });
 
     if (!error && data) {
-      const result = data as { plan?: 'free' | 'premium' | 'vip'; message_count?: number; contact_detected?: boolean; blocked_reason?: string | null };
+      const result = data as unknown as { plan?: 'free' | 'premium' | 'vip'; message_count?: number; contact_detected?: boolean; blocked_reason?: string | null };
       const plan = result.plan || 'free';
       const count = Number(result.message_count || 0);
       const contactDetected = Boolean(result.contact_detected);
@@ -199,12 +199,12 @@ function ChatContent() {
     // Server-side enforcement is authoritative. Refresh entitlement so a
     // race at the 20-message boundary or a concurrent contact check still
     // results in the correct Premium Wall rather than a generic send error.
-    const { data: refreshed } = await supabase.rpc('get_chat_entitlement', {
+    const { data: refreshed } = await (supabase as any).rpc('get_chat_entitlement', {
       p_conversation_id: activeConversation.conversationId,
       p_content: content,
     });
     if (refreshed) {
-      const latest = refreshed as { plan?: 'free' | 'premium' | 'vip'; message_count?: number; contact_detected?: boolean; blocked_reason?: string | null };
+      const latest = refreshed as unknown as { plan?: 'free' | 'premium' | 'vip'; message_count?: number; contact_detected?: boolean; blocked_reason?: string | null };
       const latestPlan = latest.plan || 'free';
       const latestCount = Number(latest.message_count || 0);
       setChatEntitlement({

@@ -56,7 +56,7 @@ export function useDiscovery() {
     const offset = reset ? 0 : offsetRef.current;
 
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_discovery_profiles', {
+      const { data, error: rpcError } = await (supabase as any).rpc('get_discovery_profiles', {
         p_limit: BATCH_SIZE,
         p_offset: offset,
       });
@@ -66,7 +66,7 @@ export function useDiscovery() {
         return;
       }
 
-      const rows = (data as DiscoveryProfile[]) || [];
+      const rows = (data as unknown as DiscoveryProfile[]) || [];
 
       if (rows.length === 0) {
         setExhausted(true);
@@ -108,30 +108,30 @@ export function useDiscovery() {
   }, [fetchBatch]);
 
   const recordLike = useCallback(async (toUserId: string, isSuperLike = false): Promise<LikeResult> => {
-    const { data, error: rpcError } = await supabase.rpc('record_like', {
+    const { data, error: rpcError } = await (supabase as any).rpc('record_like', {
       p_to_user_id: toUserId,
       p_is_super_like: isSuperLike,
     });
     if (rpcError) throw new Error(rpcError.message);
-    return data as LikeResult;
+    return data as unknown as LikeResult;
   }, [supabase]);
 
   const recordPass = useCallback(async (toUserId: string): Promise<void> => {
-    const { error: rpcError } = await supabase.rpc('record_pass', {
+    const { error: rpcError } = await (supabase as any).rpc('record_pass', {
       p_to_user_id: toUserId,
     });
     if (rpcError) throw new Error(rpcError.message);
   }, [supabase]);
 
   const recordBlock = useCallback(async (blockedUserId: string): Promise<void> => {
-    const { error: rpcError } = await supabase.rpc('record_block', {
+    const { error: rpcError } = await (supabase as any).rpc('record_block', {
       p_blocked_user_id: blockedUserId,
     });
     if (rpcError) throw new Error(rpcError.message);
   }, [supabase]);
 
   const recordReport = useCallback(async (reportedUserId: string, reason: string, description?: string): Promise<void> => {
-    const { error: rpcError } = await supabase.rpc('record_report', {
+    const { error: rpcError } = await (supabase as any).rpc('record_report', {
       p_reported_user_id: reportedUserId,
       p_reason: reason,
       p_description: description ?? null,

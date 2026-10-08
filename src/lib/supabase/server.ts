@@ -9,9 +9,9 @@ export async function createClient() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: any) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+            cookiesToSet.forEach(({ name, value, options }: any) => cookieStore.set(name, value, options));
           } catch {
             // Server Components may not allow cookie mutation; middleware handles refreshes.
           }

@@ -47,7 +47,7 @@ export function useActivity() {
     metadata: Record<string, unknown> = {}
   ) => {
     try {
-      await supabase.rpc('log_activity', {
+      await (supabase as any).rpc('log_activity', {
         p_event_type: eventType,
         p_metadata: metadata,
       });
@@ -58,7 +58,7 @@ export function useActivity() {
 
   const updateLastActive = useCallback(async () => {
     try {
-      await supabase.rpc('update_last_active');
+      await (supabase as any).rpc('update_last_active');
     } catch {
       // Silently fail
     }
@@ -69,12 +69,12 @@ export function useActivity() {
     setError(null);
     const currentOffset = reset ? 0 : offsetRef.current;
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_my_activity', {
+      const { data, error: rpcError } = await (supabase as any).rpc('get_my_activity', {
         p_limit: PAGE_SIZE,
         p_offset: currentOffset,
       });
       if (rpcError) throw new Error(rpcError.message);
-      const rows = (data as ActivityEvent[]) || [];
+      const rows = (data as unknown as ActivityEvent[]) || [];
       if (reset) {
         setEvents(rows);
         offsetRef.current = rows.length;
@@ -93,9 +93,9 @@ export function useActivity() {
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_activity_stats');
+      const { data, error: rpcError } = await (supabase as any).rpc('get_activity_stats');
       if (rpcError) throw new Error(rpcError.message);
-      setStats(data as ActivityStats);
+      setStats(data as unknown as ActivityStats);
     } catch {
       // Stats failure is non-critical
     } finally {
@@ -130,7 +130,7 @@ export async function logActivityEvent(
   try {
     const { createClient } = await import('@/lib/supabase/client');
     const supabase = createClient();
-    await supabase.rpc('log_activity', {
+    await (supabase as any).rpc('log_activity', {
       p_event_type: eventType,
       p_metadata: metadata,
     });

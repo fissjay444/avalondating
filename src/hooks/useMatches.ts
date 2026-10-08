@@ -124,7 +124,7 @@ export function useMatches() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_matches', {
+      const { data, error: rpcError } = await (supabase as any).rpc('get_matches', {
         p_limit: 50,
         p_offset: 0,
       });
@@ -132,7 +132,7 @@ export function useMatches() {
         setError(rpcError.message);
         return;
       }
-      const rows = (data as RawMatchRow[]) || [];
+      const rows = (data as unknown as RawMatchRow[]) || [];
       setMatches(rows.map(mapMatch));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load matches');
@@ -155,7 +155,7 @@ export function useNotifications() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_notifications', {
+      const { data, error: rpcError } = await (supabase as any).rpc('get_notifications', {
         p_limit: 30,
         p_offset: 0,
         p_unread_only: unreadOnly,
@@ -164,7 +164,7 @@ export function useNotifications() {
         setError(rpcError.message);
         return;
       }
-      const rows = (data as RawNotificationRow[]) || [];
+      const rows = (data as unknown as RawNotificationRow[]) || [];
       const mapped = rows.map(mapNotification);
       setNotifications(mapped);
       setUnreadCount(mapped.filter(n => !n.isRead).length);
@@ -177,7 +177,7 @@ export function useNotifications() {
 
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_unread_notification_count');
+      const { data, error: rpcError } = await (supabase as any).rpc('get_unread_notification_count');
       if (!rpcError && typeof data === 'number') {
         setUnreadCount(data);
       }
@@ -188,7 +188,7 @@ export function useNotifications() {
 
   const markRead = useCallback(async (notificationId: string) => {
     try {
-      await supabase.rpc('mark_notification_read', { p_notification_id: notificationId });
+      await (supabase as any).rpc('mark_notification_read', { p_notification_id: notificationId });
       setNotifications(prev =>
         prev.map(n => n.notificationId === notificationId ? { ...n, isRead: true } : n)
       );
@@ -200,7 +200,7 @@ export function useNotifications() {
 
   const markAllRead = useCallback(async () => {
     try {
-      await supabase.rpc('mark_all_notifications_read');
+      await (supabase as any).rpc('mark_all_notifications_read');
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch {

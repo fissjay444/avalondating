@@ -187,7 +187,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) throw error;
     // Log sign-in activity (fire-and-forget)
     try {
-      await supabase.rpc('log_activity', { p_event_type: 'signed_in', p_metadata: {} });
+      await (supabase as any).rpc('log_activity', { p_event_type: 'signed_in', p_metadata: {} });
     } catch { /* non-critical */ }
   };
 

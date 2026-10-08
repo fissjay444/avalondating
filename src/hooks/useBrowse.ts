@@ -87,14 +87,14 @@ export function useBrowse() {
 
     try {
       const params = buildRpcParams(activeFilters, offset);
-      const { data, error: rpcError } = await supabase.rpc('get_browse_profiles', params);
+      const { data, error: rpcError } = await (supabase as any).rpc('get_browse_profiles', params);
 
       if (rpcError) {
         setError(rpcError.message);
         return;
       }
 
-      const rows = (data as DiscoveryProfile[]) || [];
+      const rows = (data as unknown as DiscoveryProfile[]) || [];
       const newOffset = offset + rows.length;
       offsetRef.current = newOffset;
       setHasMore(rows.length === PAGE_SIZE);
@@ -120,7 +120,7 @@ export function useBrowse() {
 
   const fetchCount = useCallback(async () => {
     try {
-      const { data } = await supabase.rpc('get_browse_profile_count');
+      const { data } = await (supabase as any).rpc('get_browse_profile_count');
       if (typeof data === 'number') setTotalCount(data);
     } catch {
       // non-critical
@@ -153,30 +153,30 @@ export function useBrowse() {
 
   // Shared action RPCs (same as Phase 4 — no duplication)
   const recordLike = useCallback(async (toUserId: string, isSuperLike = false): Promise<LikeResult> => {
-    const { data, error: rpcError } = await supabase.rpc('record_like', {
+    const { data, error: rpcError } = await (supabase as any).rpc('record_like', {
       p_to_user_id: toUserId,
       p_is_super_like: isSuperLike,
     });
     if (rpcError) throw new Error(rpcError.message);
-    return data as LikeResult;
+    return data as unknown as LikeResult;
   }, [supabase]);
 
   const recordPass = useCallback(async (toUserId: string): Promise<void> => {
-    const { error: rpcError } = await supabase.rpc('record_pass', {
+    const { error: rpcError } = await (supabase as any).rpc('record_pass', {
       p_to_user_id: toUserId,
     });
     if (rpcError) throw new Error(rpcError.message);
   }, [supabase]);
 
   const recordBlock = useCallback(async (blockedUserId: string): Promise<void> => {
-    const { error: rpcError } = await supabase.rpc('record_block', {
+    const { error: rpcError } = await (supabase as any).rpc('record_block', {
       p_blocked_user_id: blockedUserId,
     });
     if (rpcError) throw new Error(rpcError.message);
   }, [supabase]);
 
   const recordReport = useCallback(async (reportedUserId: string, reason: string, description?: string): Promise<void> => {
-    const { error: rpcError } = await supabase.rpc('record_report', {
+    const { error: rpcError } = await (supabase as any).rpc('record_report', {
       p_reported_user_id: reportedUserId,
       p_reason: reason,
       p_description: description ?? null,
@@ -186,7 +186,7 @@ export function useBrowse() {
 
   const recordProfileView = useCallback(async (viewedUserId: string): Promise<void> => {
     try {
-      await supabase.rpc('record_profile_view', { p_viewed_user_id: viewedUserId });
+      await (supabase as any).rpc('record_profile_view', { p_viewed_user_id: viewedUserId });
     } catch {
       // non-critical — don't surface to user
     }

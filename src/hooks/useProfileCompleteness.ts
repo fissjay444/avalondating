@@ -25,9 +25,9 @@ export function useProfileCompleteness(autoFetch = true) {
     setLoading(true);
     setError(null);
     try {
-      const { data: result, error: rpcError } = await supabase.rpc('get_profile_completeness');
+      const { data: result, error: rpcError } = await (supabase as any).rpc('get_profile_completeness');
       if (rpcError) throw new Error(rpcError.message);
-      setData(result as ProfileCompleteness);
+      setData(result as unknown as ProfileCompleteness);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load profile completeness');
     } finally {

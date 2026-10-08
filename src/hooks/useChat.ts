@@ -155,7 +155,7 @@ export function useConversations() {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_conversations', {
+      const { data, error: rpcError } = await (supabase as any).rpc('get_conversations', {
         p_limit: 50,
         p_offset: 0,
       });
@@ -163,7 +163,7 @@ export function useConversations() {
         setError(rpcError.message);
         return;
       }
-      const rows = (data as RawConversationRow[]) || [];
+      const rows = (data as unknown as RawConversationRow[]) || [];
       setConversations(rows.map(mapConversation));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load conversations');
@@ -242,7 +242,7 @@ export function useMessages(conversationId: string | null, currentUserId: string
     setLoading(true);
     setError(null);
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_messages', {
+      const { data, error: rpcError } = await (supabase as any).rpc('get_messages', {
         p_conversation_id: convId,
         p_limit: PAGE_SIZE,
         p_before_id: null,
@@ -251,7 +251,7 @@ export function useMessages(conversationId: string | null, currentUserId: string
         setError(rpcError.message);
         return;
       }
-      const rows = (data as RawMessageRow[]) || [];
+      const rows = (data as unknown as RawMessageRow[]) || [];
       const mapped = rows.map(mapMessage).reverse(); // oldest first
       setMessages(mapped);
       setHasMore(rows.length === PAGE_SIZE);
@@ -268,7 +268,7 @@ export function useMessages(conversationId: string | null, currentUserId: string
     const oldestMessage = messages[0];
     setLoadingOlder(true);
     try {
-      const { data, error: rpcError } = await supabase.rpc('get_messages', {
+      const { data, error: rpcError } = await (supabase as any).rpc('get_messages', {
         p_conversation_id: conversationId,
         p_limit: PAGE_SIZE,
         p_before_id: oldestMessage.messageId,
@@ -277,7 +277,7 @@ export function useMessages(conversationId: string | null, currentUserId: string
         setError(rpcError.message);
         return;
       }
-      const rows = (data as RawMessageRow[]) || [];
+      const rows = (data as unknown as RawMessageRow[]) || [];
       const mapped = rows.map(mapMessage).reverse();
       setMessages(prev => [...mapped, ...prev]);
       setHasMore(rows.length === PAGE_SIZE);
@@ -317,7 +317,7 @@ export function useMessages(conversationId: string | null, currentUserId: string
     setMessages(prev => [...prev, optimisticMessage]);
 
     try {
-      const { data, error: rpcError } = await supabase.rpc('send_message', {
+      const { data, error: rpcError } = await (supabase as any).rpc('send_message', {
         p_conversation_id: conversationId,
         p_content: content,
         p_message_type: messageType,
@@ -340,7 +340,7 @@ export function useMessages(conversationId: string | null, currentUserId: string
       }
 
       // Replace optimistic with real message
-      const real = data as MessageRecord;
+      const real = data as unknown as MessageRecord;
       setMessages(prev =>
         prev.map(m => m.clientId === clientId ? { ...real, isOptimistic: false } : m)
       );
@@ -366,7 +366,7 @@ export function useMessages(conversationId: string | null, currentUserId: string
 
   const deleteMessage = useCallback(async (messageId: string) => {
     try {
-      await supabase.rpc('soft_delete_message', { p_message_id: messageId });
+      await (supabase as any).rpc('soft_delete_message', { p_message_id: messageId });
       setMessages(prev =>
         prev.map(m =>
           m.messageId === messageId
@@ -381,7 +381,7 @@ export function useMessages(conversationId: string | null, currentUserId: string
 
   const markRead = useCallback(async (convId: string) => {
     try {
-      await supabase.rpc('mark_messages_read', { p_conversation_id: convId });
+      await (supabase as any).rpc('mark_messages_read', { p_conversation_id: convId });
       setMessages(prev =>
         prev.map(m =>
           m.senderId !== currentUserId ? { ...m, isRead: true } : m
