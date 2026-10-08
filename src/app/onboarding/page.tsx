@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Loader2, Upload, X, Check, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import type { Database } from '@/lib/supabase/database.types';
 import { useAuth } from '@/contexts/AuthContext';
 
 const TOTAL_STEPS = 9;
@@ -176,7 +177,7 @@ export default function OnboardingPage() {
     setError('');
     try {
       if (step <= 6) {
-        const updates: Record<string, unknown> = {};
+        const updates: Database['public']['Tables']['profiles']['Update'] = {};
         if (step === 1) updates.first_name = firstName.trim();
         if (step === 2) updates.date_of_birth = dateOfBirth;
         if (step === 3) updates.gender = gender;
